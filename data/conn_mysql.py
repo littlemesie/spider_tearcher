@@ -3,8 +3,8 @@
 mysql连接
 '''
 
-import MySQLdb
-from MySQLdb.cursors import DictCursor
+import pymysql
+from pymysql.cursors import DictCursor
 from DBUtils.PooledDB import PooledDB
 from data import config
 
@@ -13,7 +13,7 @@ class MysqlUtil(object):
     # 连接MySQL
     def connection(self):
         try:
-            db = MySQLdb.connect(config.DB_HOST, config.DB_USER, config.DB_PWD, config.DB_NAME, charset=config.DB_CHARSET)
+            db = pymysql.connect(config.DB_HOST, config.DB_USER, config.DB_PWD, config.DB_NAME, charset=config.DB_CHARSET)
             cursor = db.cursor()
             return cursor
         except Exception:
@@ -40,7 +40,7 @@ class MysqlUtil(object):
         connargs = {"host": config.DB_HOST, "user": config.DB_USER, "passwd": config.DB_PWD, "db": config.DB_NAME,
                     "charset": config.DB_CHARSET}
         if MysqlUtil.pool is None:
-            MysqlUtil.pool = PooledDB(creator=MySQLdb, mincached=config.DB_MIN_CACHED, maxcached=config.DB_MAX_CACHED,
+            MysqlUtil.pool = PooledDB(creator=pymysql, mincached=config.DB_MIN_CACHED, maxcached=config.DB_MAX_CACHED,
                                maxshared=config.DB_MAX_SHARED, maxconnections=config.DB_MAX_CONNECYIONS,
                                blocking=config.DB_BLOCKING, maxusage=config.DB_MAX_USAGE,
                                setsession=config.DB_SET_SESSION,**connargs)
@@ -192,7 +192,7 @@ class MysqlUtil(object):
         if is_end == 1:
             self.end('commit')
         else:
-            self.end('rollback');
+            self.end('rollback')
         self.cursor.close()
         self.conn.close()
 
