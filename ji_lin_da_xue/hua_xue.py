@@ -2,7 +2,9 @@ import requests
 from lxml import etree
 import csv
 from queue import Queue
-import gevent 
+import gevent
+from copy import deepcopy
+import re
 from gevent import monkey
 monkey.patch_all()
 
@@ -27,19 +29,17 @@ class JiLingSpider(object):
     def get_detail_url(self):
         base_html = etree.HTML(self.base_info)
         teachers = base_html.xpath('//div[@class="teacher"]/ul/li')
-        print(len(teachers), teachers)
         for one in teachers:
             title = one.xpath('./text()')[-1]
             url = one.xpath('./a/@href')[0]
             name = one.xpath('./a/text()')[0]
             data = {
-                "title": title,
-                "name": name,
-                "url": url}
+                "职位": title,
+                "名字": name,
+                "主页地址": url}
             self.q.put(data)
             print(title, name, url)
         next_page_url_ = base_html.xpath('//a[contains(text(), "下页")]/@href')
-        print("???????: ", next_page_url_	)
         if next_page_url_:
             if "js2" in next_page_url_[0]:
                 next_page_url = "http://chem.jlu.edu.cn/szll/" + \
@@ -54,8 +54,17 @@ class JiLingSpider(object):
         data = self.q.get()
         url = data["url"]
         detail_info = self.downloader(url)
-        detail_tree = etree.HTML(detail_info)
-        email = detail_tree.xpath('')
+        info_html = etree.HTML(detail_info)
+        data = self.extract_red_head_page_info(info_html, deepcopy(data))
+
+    def extract_red_head_page_info(self, info_html, data):
+        name_box_info = info_html.xpath('//div[@class="namebx"]//text()')
+        name_box_info = "".join(name_box_info)
+        emailregex = r"[-_\w\.]{0,64}@([-\w]{1,63}\.)*[-A-Za-z0-9]{1,63}"
+        email = re.search(emailregex, name_box_info)
+        data["邮箱"] = email.group() if email else ""
+
+        return data
 
     @staticmethod
     def save(content_list):

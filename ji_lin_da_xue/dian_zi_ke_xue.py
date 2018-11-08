@@ -66,8 +66,8 @@ class JiLingSpider(object):
 
     def get_detail_info(self):
         teacher_infos = []
+        time.sleep(5)
         while True:
-            time.sleep(5)
             if self.q.empty():
                 break
             data = self.q.get()
@@ -78,6 +78,9 @@ class JiLingSpider(object):
             infos = detail_tree.xpath(
                 '//div[@class="v_news_content"]/p//text()')
             info = "".join(infos)
+            if len(info) < 10:
+                teacher_infos.append(data)
+                continue
             data = self.extract_info_by_re(info, deepcopy(data))
             teacher_infos.append(data)
         self.save(teacher_infos)
@@ -120,7 +123,7 @@ class JiLingSpider(object):
         if paper:
             paper = paper.group()[:-2].replace(
                 "。", "。\n").replace("代表性工作及论文", "").strip()
-            if "专利" in paper:
+            if "专利" in paper and "授权" in paper:
                 paper_ = re.search(
                     r'[\s\S]+?(已\S+?专利|授\S+?专利|申\S+?专利)',
                     paper)
@@ -130,7 +133,7 @@ class JiLingSpider(object):
                     paper_ = ""
                 paper_ = re.sub("[已授]\S+?专利", "", paper_)
                 patent = re.search(
-                    r'专利[\s\S]+', paper).group().replace("；", "；\n")
+                    r'专利[\s\S]+', paper).group()
                 patent = re.sub('(专利:|专利)', '', patent)
                 data["代表性工作及论文"] = paper_
                 data["专利"] = patent
