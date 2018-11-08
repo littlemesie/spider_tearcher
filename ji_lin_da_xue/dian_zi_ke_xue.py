@@ -15,7 +15,8 @@ base_url = "http://ee.jlu.edu.cn/szdw/wdkxygcx.htm"
 key_list = ["研究方向", "科研项目", "讲授课程", "论文", "联系方式", "简历"]
 
 headers = {
-    "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.77 Safari/537.36",
+    "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTM"
+                  "L, like Gecko) Chrome/70.0.3538.77 Safari/537.36",
 }
 
 
@@ -117,11 +118,9 @@ class JiLingSpider(object):
         paperre = r'代表性工作及论文[\s\S]+?(一、|二、|三、|四、|五、|六、|七、)'
         paper = re.search(paperre, info)
         if paper:
-            print("have")
             paper = paper.group()[:-2].replace(
                 "。", "。\n").replace("代表性工作及论文", "").strip()
             if "专利" in paper:
-                print(paper)
                 paper_ = re.search(
                     r'[\s\S]+?(已\S+?专利|授\S+?专利|申\S+?专利)',
                     paper)
@@ -133,7 +132,6 @@ class JiLingSpider(object):
                 patent = re.search(
                     r'专利[\s\S]+', paper).group().replace("；", "；\n")
                 patent = re.sub('(专利:|专利)', '', patent)
-                print("paten--:", patent)
                 data["代表性工作及论文"] = paper_
                 data["专利"] = patent
             else:
@@ -153,7 +151,7 @@ class JiLingSpider(object):
 
     @staticmethod
     def save(content_list):
-        with open('test.csv', 'a', encoding='UTF-8') as f:
+        with open('吉林大学_电子科学与工程学院.csv', 'a', encoding='UTF-8') as f:
             writer = csv.DictWriter(f,
                                     fieldnames=['系', '名字', '主页地址', '电话', '邮箱',
                                                 '专利', '代表性工作及论文', '研究方向',

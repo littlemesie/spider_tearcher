@@ -4,8 +4,6 @@
 
 import requests
 from dong_bei.conf import base_url, headers
-from dong_bei.mysql_api import local_cursor
-from dong_bei.get_ip import get_ip_from_url
 from lxml import etree
 from copy import deepcopy
 
@@ -13,26 +11,11 @@ from copy import deepcopy
 class TeacherSpider(object):
 
     def __init__(self):
-        self.ip_port = get_ip_from_url()
-        self.proxies = {
-            "http": f"http://{self.ip_port}",
-            "https": f"https://{self.ip_port}"
-        }
+        pass
 
     def get_teacher_list(self):
         print(base_url)
-        while True:
-            try:
-                teachers_res = requests.get(base_url, headers=headers,
-                                            proxies=self.proxies, timeout=2)
-                if "The requested URL could not be retrieved" in \
-                        teachers_res.text:
-                    raise requests.exceptions.ProxyError
-                break
-            except (requests.exceptions.ConnectionError,
-                    requests.exceptions.ConnectTimeout,
-                    requests.exceptions.ProxyError):
-                self.change_ip()
+        teachers_res = requests.get(base_url, headers=headers)
         teachers_tree = etree.HTML(teachers_res.content.decode())
         # print(teachers_res.text)
 
@@ -56,44 +39,12 @@ class TeacherSpider(object):
                 one_data["url"] = url
                 self.get_detail_info(one_data)
 
-    def change_ip(self):
-        self.ip_port = get_ip_from_url()
-        self.proxies = {
-            "http": f"http://{self.ip_port}",
-            "https": f"https://{self.ip_port}"
-        }
-
     def get_detail_info(self, data):
         url = data["url"]
-        while True:
-            try:
-                detail_res = requests.get(url, headers=headers,
-                                            proxies=self.proxies, timeout=2)
-                if "The requested URL could not be retrieved" in \
-                        detail_res.text:
-                    raise requests.exceptions.ProxyError
-                break
-            except (requests.exceptions.ConnectionError,
-                    requests.exceptions.ConnectTimeout,
-                    requests.exceptions.ProxyError):
-                self.change_ip()
-            except requests.exceptions.ReadTimeout:
-                pass
+        detail_res = requests.get(url, headers=headers)
         if detail_res.status_code == 404:
             return
-        try:
-            detail_tree = etree.HTML(detail_res.content.decode(errors="ignore"))
-        except:
-            detail_tree = etree.parse(detail_res.content.decode(errors="ignore"))
-
-
-        # infos = detail_tree.xpath(
-        #     '//div[@class="article"]/p/text()|//div['
-        #     '@class="article"]/p/span/text()|//div[@class="article"]/h2/text('
-        #     ')|//div[@class="article"]/div/span/text()|//div['
-        #     '@class="article"]//div/span/strong/text()|//div['
-        #     '@class="article"]//a/text()|//div['
-        #     '@class="article"]//strong/text()')
+        detail_tree = etree.HTML(detail_res.content.decode(errors="ignore"))
 
         infos = detail_tree.xpath('//div[@class="article"]//text()')
         infos = list(map(
@@ -127,6 +78,7 @@ class TeacherSpider(object):
             if "代表性专利" in thesis_paten:
                 data["patent"] = thesis_paten.split("代表性专利")[-1]
         print(data)
+
 
 if __name__ == '__main__':
     a = TeacherSpider()

@@ -57,6 +57,18 @@ class JiLingSpider(object):
         detail_tree = etree.HTML(detail_info)
         email = detail_tree.xpath('')
 
+    @staticmethod
+    def save(content_list):
+        with open('化学学院.csv', 'a', encoding='UTF-8') as f:
+            writer = csv.DictWriter(f,
+                                    fieldnames=['系', '名字', '主页地址', '电话', '邮箱',
+                                                '专利', '代表性工作及论文', '研究方向',
+                                                '讲授课程', '学院', '大学', '承担科研项目及获奖',
+                                                "简历"])
+            writer.writeheader()
+            for content in content_list:
+                writer.writerow(content)
+
     def run(self):
         gevent.joinall([
             gevent.spawn(self.get_detail_url),
