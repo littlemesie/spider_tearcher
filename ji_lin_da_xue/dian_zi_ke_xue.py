@@ -12,8 +12,6 @@ monkey.patch_all()
 
 base_url = "http://ee.jlu.edu.cn/szdw/wdkxygcx.htm"
 
-key_list = ["研究方向", "科研项目", "讲授课程", "论文", "联系方式", "简历"]
-
 headers = {
     "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTM"
                   "L, like Gecko) Chrome/70.0.3538.77 Safari/537.36",
