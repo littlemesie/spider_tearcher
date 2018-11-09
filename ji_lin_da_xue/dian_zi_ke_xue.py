@@ -1,3 +1,7 @@
+# -*- coding:utf-8 -*-
+# Date   : Wen Nov 07 12:32:09 2018 +0800
+# Author : Rory Xiang
+
 import requests
 from lxml import etree
 import csv
