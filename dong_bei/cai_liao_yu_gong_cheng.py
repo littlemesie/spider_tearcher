@@ -37,9 +37,11 @@ class TeacherSpider(object):
             detail_urls = list(map(
                 lambda x: "http://www.mse.neu.edu.cn"+x, detail_urls_
             ))
-            for url in detail_urls:
+            names = one.xpath('.//a/text()')
+            for index, url in enumerate(detail_urls):
                 one_data = deepcopy(data)
                 one_data["主页地址"] = url
+                one_data["名字"] = names[index]
                 self.q.put(one_data)
 
     def get_detail_info(self):
@@ -55,6 +57,8 @@ class TeacherSpider(object):
                 teacher_infos.append(data)
                 continue
             detail_tree = etree.HTML(detail_res.content.decode(errors="ignore"))
+            # name = detail_tree.xpath('//div[@class="article"]/h2/text()')
+            # data["名字"] = name[0].strip() if name else ""
 
             infos = detail_tree.xpath('//div[@class="article"]//text()')
             infos = list(map(
@@ -69,7 +73,15 @@ class TeacherSpider(object):
         self.save(teacher_infos)
 
     def extract_info_by_re(self, info, data):
-
+        name = data["名字"]
+        title = re.search(f'{name}[\s\S](性[\s\S]*别)', info)
+        if title:
+            title = title.group()
+            title = re.sub(name, "", title)
+            title = re.sub('(性[\s\S]*别)', "", title)
+            data["职称"] = title
+        else:
+            data["职称"] = ""
         # 教育经历
         educations = r'(学习简历)[\s\S]+?(工作简历)'
         education = re.search(educations, info)
@@ -170,7 +182,8 @@ class TeacherSpider(object):
                                     fieldnames=['系', '名字', '主页地址', '电话', '邮箱',
                                                 '专利', '社会兼职', '研究方向',
                                                 '科研项目', '学院', '大学', '教育经历',
-                                                "个人简介", "工作经历", "职位", "论文著作"])
+                                                "个人简介", "工作经历", "职位", "论文著作",
+                                                "职称"])
             writer.writeheader()
             for content in content_list:
                 writer.writerow(content)
