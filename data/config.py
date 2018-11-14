@@ -5,7 +5,7 @@
 DB_HOST = "localhost"
 DB_PORT = "3306"
 DB_USER = "root"
-DB_PWD = "123456"
+DB_PWD = "mesie1212"
 DB_NAME = "tearcher"
 DB_CHARSET = "utf8"
 # mincached : 启动时开启的空连接数量(0代表开始时不创建连接)

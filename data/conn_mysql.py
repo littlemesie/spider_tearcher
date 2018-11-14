@@ -106,13 +106,16 @@ class MysqlUtil(object):
         @param value:要插入的记录数据tuple/list
         @return: insert_id 受影响的行数
         """
-        try:
-            self.cursor.execute(sql, value)
-            self.conn.commit()
-            return self.get_insert_id()
-        except:
-            self.conn.rollback()
-            return 0
+        self.cursor.execute(sql, value)
+        self.conn.commit()
+        return self.get_insert_id()
+        # try:
+        #     self.cursor.execute(sql, value)
+        #     self.conn.commit()
+        #     return self.get_insert_id()
+        # except:
+        #     self.conn.rollback()
+        #     return 0
 
     def insert_many(self, sql, values):
         """
